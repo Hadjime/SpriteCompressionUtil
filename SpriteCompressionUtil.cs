@@ -135,23 +135,32 @@ public class SpriteCompressionUtil : EditorWindow
 
         List<Sprite> sprites = GetAssets<Sprite>(path);
         List<SpriteAtlas> spriteAtlases = GetAssets<SpriteAtlas>(path);
+        List<Texture2D> textures = GetAssets<Texture2D>(path);
 
-        CustomDebug.Log($"Found {sprites.Count} sprites");
-        CustomDebug.Log($"Found {spriteAtlases.Count} sprite atlases");
+        Debug.Log($"Found {sprites.Count} sprites");
+        Debug.Log($"Found {spriteAtlases.Count} sprite atlases");
+        Debug.Log($"Found {textures.Count} textures");
 
-        foreach(var sprite in sprites)
+        foreach (var tex in textures)
         {
-            SetSpriteComperession(sprite);
+            SetTextureComperession(tex);
         }
 
-        CustomDebug.Log("Sprites compression was completed!");
+        Debug.Log("Textures compression was completed!");
 
-        foreach (var spriteAtlas in spriteAtlases)
-        {
-            SetSpriteAtlasComperession(spriteAtlas);
-        }
+        //foreach (var sprite in sprites)
+        //{
+        //    SetSpriteComperession(sprite);
+        //}
 
-        CustomDebug.Log("Sprites atlases compression was completed!");
+        //Debug.Log("Sprites compression was completed!");
+
+        //foreach (var spriteAtlas in spriteAtlases)
+        //{
+        //    SetSpriteAtlasComperession(spriteAtlas);
+        //}
+
+        //Debug.Log("Sprites atlases compression was completed!");
     }
 
 
@@ -178,6 +187,21 @@ public class SpriteCompressionUtil : EditorWindow
         return result;
     }
 
+    private void SetTextureComperession(Texture2D tex)
+    {
+        TextureImporter ti = (TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(tex));
+
+        TextureImporterPlatformSettings settings = ti.GetPlatformTextureSettings(platformBuildTargetForSprites[buildTarget].nameForSprite);
+
+        bool apply = fromFormats.Length == 0 || Array.Exists(fromFormats, x => x == toFormat);
+        if (apply)
+        {
+            settings.overridden = true;
+            settings.format = toFormat;
+            ti.SetPlatformTextureSettings(settings);
+            ti.SaveAndReimport();
+        }
+    }
 
     private void SetSpriteComperession(Sprite sprite) 
     {
@@ -185,8 +209,10 @@ public class SpriteCompressionUtil : EditorWindow
 
         TextureImporterPlatformSettings settings = ti.GetPlatformTextureSettings(platformBuildTargetForSprites[buildTarget].nameForSprite);
 
-        if (Array.Exists(fromFormats, x => x == toFormat))
+        bool apply = fromFormats.Length == 0 || Array.Exists(fromFormats, x => x == toFormat);
+        if (apply)
         {
+            settings.overridden = true;
             settings.format = toFormat;
             ti.SetPlatformTextureSettings(settings);
             ti.SaveAndReimport();
@@ -202,6 +228,7 @@ public class SpriteCompressionUtil : EditorWindow
 
         if (Array.Exists(fromFormats, x => x == toFormat))
         {
+            settings.overridden = true;
             settings.format = toFormat;
             spriteAtlas.SetPlatformSettings(settings);
             importer.SaveAndReimport();
